@@ -1,0 +1,70 @@
+var neuron;
+
+var imgIndex = 0;
+var imgLinks = ["https://i.imgur.com/hk22xdy.png","https://i.imgur.com/nIYTDPa.png"];
+var imgs = new Array(imgLinks.length);
+
+var pixIndex = 0;
+
+function setup() { 
+  frameRate(5);
+  createCanvas(400, 400);
+  neuron = new Neuron(5,50);
+  
+  for(var i = 0; i < imgLinks.length; i++){
+  	imgs[i] = loadImage(imgLinks[i]);
+  }
+} 
+
+function draw() { 
+  background(220);
+  image(imgs[imgIndex],0,0);
+  imgIndex ++;
+  if(imgIndex >= imgLinks.length){
+     imgIndex = 0;
+	}
+     
+  var neuronInputs = new Array(100); 
+  for(var i = 0; i < 10; i++){
+  	for(var j = 0; j < 10; j++){
+    	neuronInputs[pixIndex] = get(i,j)[0];
+      pixIndex++;
+    }
+  }
+  pixIndex = 0;
+  
+  neuron.changeWeights();
+  console.log(neuronInputs);
+  //console.log(neuron.think(neuronInputs));
+}
+
+
+function Neuron(Threshold, WeightNum){
+  this.weights = [];
+  this.weightNum = WeightNum;
+  this.threshold = Threshold;
+  
+	this.think = function(Inputs){
+    this.inputs = Inputs;
+  	this.sum = 0;
+    for(var i = 0; i < this.inputs.length; i++){
+    	this.sum += this.inputs[i] * this.weights[i];
+    }
+    if(this.sum >= this.threshold){
+       return true;
+  	}else if(this.sum < this.threshold){
+    	return false;
+    }
+  }
+  
+  this.changeWeights = function(){
+    this.weights = new Array(this.weightNum);
+  	for(var i = 0; i < this.weights.length; i++){
+      if(Math.random() >= 0.5){
+      	this.weights[i] = Math.random();
+      }else{
+      	this.weights[i] = Math.random() * -1;
+      }
+    }
+  }
+}
