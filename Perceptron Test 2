@@ -1,15 +1,20 @@
 var neuron;
 
 var imgIndex = 0;
-var imgLinks = ["https://i.imgur.com/hk22xdy.png","https://i.imgur.com/nIYTDPa.png"];
+var imgLinks = ["https://i.imgur.com/hk22xdy.png","https://i.imgur.com/nIYTDPa.png","https://i.imgur.com/rYarLcN.png", "https://i.imgur.com/V6NqNwM.png", "https://i.imgur.com/OPstsV6.png","https://i.imgur.com/fwxTVZ4.png"]; //last one is robbie rotten
+var correctImg = "https://i.imgur.com/hk22xdy.png";
 var imgs = new Array(imgLinks.length);
+
+var numRight = 0;
+var frames = 0;
 
 var pixIndex = 0;
 
 function setup() { 
-  frameRate(5);
-  createCanvas(400, 400);
-  neuron = new Neuron(5,50);
+  frameRate(10);
+  createCanvas(500, 200);
+  neuron = new Neuron(20,100);
+  neuron.changeWeights();
   
   for(var i = 0; i < imgLinks.length; i++){
   	imgs[i] = loadImage(imgLinks[i]);
@@ -18,24 +23,36 @@ function setup() {
 
 function draw() { 
   background(220);
-  image(imgs[imgIndex],0,0);
-  imgIndex ++;
-  if(imgIndex >= imgLinks.length){
-     imgIndex = 0;
-	}
+  text("input: ", 0,10);
+  image(imgs[imgIndex],30,0);
      
   var neuronInputs = new Array(100); 
   for(var i = 0; i < 10; i++){
   	for(var j = 0; j < 10; j++){
-    	neuronInputs[pixIndex] = get(i,j)[0];
+    	neuronInputs[pixIndex] = get(i + 30,j)[0];
       pixIndex++;
     }
   }
   pixIndex = 0;
   
-  neuron.changeWeights();
-  console.log(neuronInputs);
-  //console.log(neuron.think(neuronInputs));
+  var output = neuron.think(neuronInputs);
+  var status;
+  if(((imgLinks[imgIndex] == correctImg) && (output == true)) ||
+    ((imgLinks[imgIndex] != correctImg) && (output == false))){
+    status = ["right","answering"];
+    numRight++;
+    imgIndex = Math.floor(Math.random() * ((imgLinks.length - 1) - 0 + 1)) + 0;
+  }else{
+  	status = ["wrong","learning"];
+    neuron.changeWeights();
+  }
+  frames++;
+  text("output: " + output,0,20);
+  text("right/wrong? " + status[0],0,35);
+  text("status: " + status[1],0,50);
+  text("percent right: " + ((numRight/frames) * 100) + "%",0,65);
+  text("weights: " + neuron.weights, 0,80);
+  text(frameRate() + " FPS", 0, 95);
 }
 
 
@@ -52,7 +69,7 @@ function Neuron(Threshold, WeightNum){
     }
     if(this.sum >= this.threshold){
        return true;
-  	}else if(this.sum < this.threshold){
+  	}else{
     	return false;
     }
   }
